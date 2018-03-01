@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Volunteer</title>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    <style>
+        body {
+            padding-top: 80px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <p class="navbar-text">Volunteer System</p>
+            <p class="navbar-text"><%- username %></p>
+            <form action ="/logout" method="get">
+                <button type="submits" class="btn btn-default navbar-right" style="margin: 8px -100px 0 0;">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="container" >
+        <p class="navbar-text">All service requests</p>
+        <div class="jumbotron text-center">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>StartTime</th>
+                    <th>EndTime</th>
+                    <th>Location</th>
+                    <th>Requirements</th>
+                    <th></th>
+                </tr>
+                <tbody id="tbody-serviceRequest">
+
+                </tbody>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <div class="container" >
+        <p class="navbar-text">Signed up ready</p>
+        <div class="jumbotron text-center">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>StartTime</th>
+                    <th>EndTime</th>
+                    <th>Location</th>
+                    <th>Requirements</th>
+                    <th>SignIn Members</th>
+                    <th></th>
+                </tr>
+                <tbody id="tbody-serviceSignIn">
+
+                </tbody>
+                </thead>
+            </table>
+        </div>
+    </div>
+    <hr>
+    <p><a href="/userManual">UserManual</a></p>
+
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+        var titles = [];
+        var canceltitles = [];
+        var currentUser=null;
+        getCurrentUser(function (err,user) {
+            if(!err){
+                currentUser=user;
+                getDataOfService();//getSignInData();
+            }
+        });
+        getSignInData();
+        function getDataOfService() {
+            $("#tbody-serviceRequest").empty();
+            titles = [];
+            $.ajax({
+                url: "/services",
+                method: "get",
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        var cur = data[i];
+                        var title = "<td>" + cur.title + "</td>";
+                        titles.push(cur.title);
+                        var date = "<td>" + cur.date + "</td>";
+                        var starTime = "<td>" + cur.startTime + "</td>";
+                        var endTime = "<td>" + cur.endTime + "</td>";
+                        var location = "<td>" + cur.location + "</td>";
+                        var contents = "<td>" + cur.contents + "</td>";
+                        //var btn = "<td><button type='button' onclick='signIn("+cur.title+")'>Sign in</button></td>";
+                        var btn;
+                        console.log("current sctiveity", cur);
+                        if(cur.isConfirmed){
+                            btn = "<td>Confirmed</td>";
+                        }else {
+                            var isSignIn= false;
+                            for(var p=0;p<cur.signInMember.length;p++){
+                                var user=cur.signInMember[p];
+                                if(user.voluntemail==currentUser.volunteeremail){
+                                    isSignIn=true;
+                                    break;
+                                }
+                            }
+                            if(isSignIn){
+                                btn = "<td>Already Sign in</td>";
+                            }else if(!cur.status){
+                                btn = "<td>full people</td>"
+                            }else{
+                                btn = "<td><button type='button' onclick='signIn("+i+")'>Sign in</button></td>";
+                            }
+                        }
+                        var row = "<tr align=\"left\">" + title + date + starTime + endTime + location + contents + btn +"</tr>";
+                        $("#tbody-serviceRequest").append(row);
+                    }
+                }
+            });
+        }
+
+       function getCurrentUser(cb) {
+           $.ajax({
+               url: "/getcurrentuser",
+               method: "get",
+               success: function (data) {
+                   if(!data.err){
+                       cb(null,data);
+                   }else {
+                       cb(data,null);
+                   }
+
+               }
+            })
+       }
+       function getSignInData() {
+           $("#tbody-serviceSignIn").empty();
+           canceltitles = [];
+           $.ajax({
+               url: "/getSignInData",
+               method: "get",
+               success: function (filterData) {
+                   var row = "";
+                   for (var j =0;j<filterData.length; j++){
+                       if(filterData[j].signInMember)
+                       var title = "<td>" + filterData[j].title + "</td>";
+                       canceltitles.push(filterData[j].title);
+                       var date = "<td>" + filterData[j].date + "</td>";
+                       var starTime = "<td>" + filterData[j].startTime + "</td>";
+                       var endTime = "<td>" + filterData[j].endTime + "</td>";
+                       var location = "<td>" + filterData[j].location + "</td>";
+                       var contents = "<td>" + filterData[j].contents + "</td>";
+                       var volunteerName="";
+                       for(var i =0;i<filterData[j].signInMember.length;i++) {
+                           volunteerName += filterData[j].signInMember[i].voluntname + "</br>"
+                       }
+                       var btn;
+                       // btn = "<td><button type='button' onclick='cancels('"+filterData[j].title+"')'>Cancel</button></td>";
+                        if(filterData[j].isConfirmed){
+                            btn = "<td>Service has confirmed</td>";
+                        }else{
+                            btn = "<td><button type='button' onclick='cancels("+j+")'>Cancel</button></td>";
+                        }
+                       row = "<tr align=\"left\">" + title + date + starTime + endTime + location + contents + "<td>"+volunteerName+"</td>"+ btn +"</tr>";
+                       $("#tbody-serviceSignIn").append(row);
+                   }
+               }
+           });
+       }
+        function signIn(i) {  //function signIn(title) {
+            var t = titles[i];
+            $.ajax({
+                url: "/signIn?title="+t,
+                method: "get",
+                success:
+                    function (data) {
+                    if(data.err){
+                        alert(data.err);
+                        return;
+                    }else{
+                        getDataOfService()
+                        getSignInData()
+                    }
+
+                    }
+                /*success: function (data) {
+                    console.log(data);
+                        var title = "<td>" + data.title + "</td>";
+                        var date = "<td>" + data.date + "</td>";
+                        var starTime = "<td>" + data.startTime + "</td>";
+                        var endTime = "<td>" + data.endTime + "</td>";
+                        var location = "<td>" + data.location + "</td>";
+                        var contents = "<td>" + data.contents + "</td>";
+                        var volunteerName="";
+                      for(var i =0;i<data.signInMember.length;i++) {
+                             volunteerName += data.signInMember[i].voluntname + "</br>"
+                      }
+                        var btn;
+                        btn = "<td><button type='button' onclick='cancels("+i+")'>Cancel</button></td>";
+                        var row = "<tr align=\"left\">" + title + date + starTime + endTime + location + contents + "<td>"+volunteerName+"</td>"+ btn +"</tr>";
+                        $("#tbody-serviceSignIn").append(row);
+                }*/
+            });
+        }
+        
+        function cancels(i) {
+            $.ajax({
+                url: "/cancels?title="+canceltitles[i],
+                method: "post",
+                success:function (data) {
+                    canceltitles.splice(i, 1);
+                    getDataOfService();
+                    getSignInData();
+                },
+                error : function (error) {
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>AdminManagement</title>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    <style>
+        body {
+            padding-top: 80px;
+        }
+    </style>
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <p class="navbar-text">Volunteer System</p>
+        <p class="navbar-text">Admin</p>
+        <form action ="/logout" method="get">
+            <button type="submit" class="btn btn-default navbar-right" style="margin: 8px -100px 0 0;">Logout</button>
+        </form>
+    </div>
+</nav>
+ <div class="container">
+     <div class="jumbotron text-center">
+       <h1><span class="glyphicon glyphicon-user"></span>Welcome! Administrator</h1>
+       <p>What will you do?</p>
+       <form action="/admin/createManager" method="post">
+            <button type="submit" class="btn btn-default"><span class="fa fa-user"></span>Create Manager</button>
+        </form>
+        <form action="/admin/createVolunteer" method="post">
+            <button type="submit" class="btn btn-default"><span class="fa fa-user"></span>Create Volunteer</button>
+        </form>
+         <form class="form-inline">
+             <div class="form-group">
+                 <label for="inputUsername">Volunteer Name</label>
+                 <input type="text" class="form-control" id="inputUsername" placeholder="please input volunteer name">
+             </div>
+             <button type = "button" class="btn btn-default" onclick="searchUserService()"  data-toggle="modal" data-target="#myModal">search</button>
+         </form>
+         <!--预订来发送邮件<form action="/admin/createVolunteer" method="post"> -->
+             <!--<button type="submit" class="btn btn-default"><span class="fa fa-user"></span>Create Volunteer</button>-->
+         <!--</form>-->
+   </div>
+ </div>
+
+
+
+ <div class="container">
+     <div class="jumbotron text-center">
+         <table class="table table-hover">
+             <thead>
+             <tr>
+                 <th>Manager email</th>
+                 <th>Manager name</th>
+                 <th>Object ID</th>
+                 <th></th>
+             </tr>
+             <tbody id="tbody-managers">
+               <!--//sign up 跳转-->
+             </tbody>
+             </thead>
+         </table>
+     </div>
+ </div>
+
+ <div class="container">
+     <div class="jumbotron text-center">
+         <table class="table table-hover">
+             <thead>
+             <tr>
+                 <th>Volunteer email</th>
+                 <th>Volunteer name</th>
+                 <th>Object ID</th>
+                 <th></th>
+             </tr>
+             <tbody id="tbody-volunteers">
+
+             </tbody>
+             </thead>
+         </table>
+     </div>
+ </div>
+
+<div class="container" >
+    <p class="navbar-text">All services requests</p>
+    <div class="jumbotron text-center">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>StartTime</th>
+                    <th>EndTime</th>
+                    <th>Location</th>
+                    <th>Requirement</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="tbody-serviceSignIn">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+ <hr>
+
+ <p><a href="/index">Back</a></p><p><a href="/userManual">UserManual</a></p>
+
+
+<!--<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">-->
+    <!--Launch demo modal-->
+<!--</button>-->
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel"></h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-hover" style="margin-bottom: 0px">
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Date</th>
+                        <th>StartTime</th>
+                        <th>EndTime</th>
+                        <th>Location</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbody-userService">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+ <script>
+     getManager();
+     getVolunteers();
+     var volunteersEmail = [];
+     var managersEmail = [];
+     function getManager(){
+         $("#tbody-managers").empty();
+         managersEmail = [];
+         $.ajax({
+             url: "/managers",
+             method: "get",
+             success: function (data) {
+                 for (var i = 0; i < data.length; i++) {
+                     var cur = data[i];
+                     var managerName = "<td>" + cur.managername + "</td>";
+                     var managerEmail= "<td>" + cur.manageremail + "</td>";
+                     var objectID = "<td>" + cur._id + "</td>";
+                     managersEmail.push(cur.manageremail);
+                     var btn = "<td><button type='button' onclick='deleteManager("+i+")'>Delete</button></td>";
+                     var row = "<tr align=\"left\">" + managerEmail + managerName + objectID  + btn +"</tr>";
+                     $("#tbody-managers").append(row);
+                 }
+             }
+         });
+     }
+
+     function getVolunteers() {
+         $("#tbody-volunteers").empty();
+         volunteersEmail = [];
+         $.ajax({
+             url: "/volunteers",
+             method: "get",
+             success: function (data) {
+                 for (var i = 0; i < data.length; i++) {
+                     var cur = data[i];
+                     var volunteerName = "<td>" + cur.volunteername + "</td>";
+                     var volunteerEmail= "<td>" + cur.volunteeremail + "</td>";
+                     var objectID = "<td>" + cur._id + "</td>";
+                     volunteersEmail.push(cur.volunteeremail);
+                     var btn = "<td><button type='button' onclick='deleteVol("+i+")'>Delete</button></td>";
+                     var row = "<tr align=\"left\">" + volunteerEmail + volunteerName + objectID + btn +"</tr>";
+                     $("#tbody-volunteers").append(row);
+                 }
+             }
+         });
+     }
+
+     var titles=[];
+     var services=[];
+     getServices();
+     function getServices() {
+         $("#tbody-serviceSignIn").empty();
+         $.ajax({
+             url: "/servicesSignIn",
+             method: "get",
+             success: function (data) {
+                 services=data;
+                 //console.log("all request service",data);
+                 for (var i = 0; i < data.length; i++) {
+                     var cur = data[i];
+                     var title = "<td>" + cur.title + "</td>";
+                     titles.push(cur.title);
+                     var date = "<td>" + cur.date + "</td>";
+                     var starTime = "<td>" + cur.startTime + "</td>";
+                     var endTime = "<td>" + cur.endTime + "</td>";
+                     var location = "<td>" + cur.location + "</td>";
+                     var contents = "<td>" + cur.contents + "</td>";
+                     var volunteerName="";
+                     for(var j =0;j<data[i].signInMember.length;j++) {
+                         volunteerName += data[i].signInMember[j].voluntname + "</br>"
+                     }
+                     var btn ;
+                     if(!cur.isConfirmed){
+                         btn = "<td><button type='button' onclick='confirms("+i+")'>Confirm</button></td>";
+                     }else {
+                         btn = "<td><button type='button' onclick='sendmail("+i+")'>Send emails</button></td>";
+                     }
+                     var row = "<tr align=\"left\">" + title + date + starTime + endTime + location + contents + "<td>"+volunteerName+"</td>" + btn  +"</tr>";
+                     //console.log("all request service row value------", row);
+                     $("#tbody-serviceSignIn").append(row);
+                 }
+             }
+         });
+     }
+
+     function confirms(i) {
+         /*console.log(services[i]._id);*/
+         $.ajax({
+             url: "/changeconfirm?id="+services[i]._id,
+             method: "post",
+             success:function () {
+                 getServices()
+             }
+         });
+     }
+
+     function sendmail(i) {
+         var t=titles[i];
+         $.ajax({
+             url: "/sendmails?title="+t,
+             method: "get",
+             success:
+                 alert("Email sends successfully")
+
+         });
+     }
+
+     function deleteManager(i) {
+         $.ajax({
+             url: "/deleteManager?managerEmail=" + managersEmail[i],
+             method : "post",
+             success:
+                 function () {
+                     getManager();
+                     getServices();
+                 }
+         })
+     }
+     function deleteVol(i) {
+         //console.log("volunter email"+volunteersEmail[i]);
+         $.ajax({
+             url: "/deleteVolunteer?volunteerEmail=" + volunteersEmail[i],
+             method : "post",
+             success:
+             function () {
+                 getVolunteers();
+                 getServices();
+             }
+         })
+     }
+
+     function searchUserService() {
+         var val = $('#inputUsername').val();
+         //console.log("user name value", val);
+
+         $('#inputUsername').val('');
+         if(val == null || val == ''){
+             return;
+         }
+         $('#myModalLabel').text(val);
+         $.ajax({
+             url:"/getUserService?name=" + val,
+             method: "get"
+         }).then(
+             function (data) {
+                 console.log("data", data);
+                 generateRow(data);
+             },
+             function (error) {
+                 console.log("eror", error);
+             }
+         )
+     }
+     /*
+     *
+     *
+     *
+     *
+     * <th>Title</th>
+                <th>Date</th>
+                <th>StartTime</th>
+                <th>EndTime</th>
+                <th>Location</th>
+     * */
+     function generateRow(data) {
+         $('#tbody-userService').empty();
+         //console.log("geberate row", data);
+         var table = $('#tbody-userService');
+         for(var i =0;i < data.length; i ++){
+             var temp = data[i];
+             //console.log("one row--------------", temp, typeof temp);
+             //console.log("temp title--------------", temp.title);
+             // var row = $(`<tr align="left"><td>${temp.title}</td><td>${temp.date}</td><td>${temp.startTime}</td>
+             //            <td>${temp.endTime}</td><td>${temp.location}</td><td>${temp.contents}</td>
+             //            <td><button type = "button" onclick="deleteservice('${temp.title}')">Delete</button></td></tr>`);
+             var row = $(`<tr><td>${temp.title}</td><td>${temp.date}</td><td>${temp.startTime}</td><td>${temp.endTime}</td><td>${temp.location}</td></tr>`)
+             row.appendTo(table);
+         }
+     }
+ </script>
+
+</body>
+</html>

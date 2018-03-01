@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+    <title>Create service request</title>
+    <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 80px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <div class="col-sm-6 col-sm-offset-3">
+        <h1><span class="fa fa-sign-in"></span>Create ServiceRequest</h1>
+        <!-- LOGIN FORM -->
+        <form action="/createServiceRequest" method="POST">
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" class="form-control" name="title">
+            </div>
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" class="form-control" name="date">
+            </div>
+            <div class="form-group">
+                <label>Star Time</label>
+                <input type="time" class="form-control" name="startTime">
+            </div>
+            <div class="form-group">
+                <label>End Time</label>
+                <input type="time" class="form-control" name="endTime">
+            </div>
+            <div class="form-group">
+                <label>Location</label>
+                <input type="text" class="form-control" name="location">
+            </div>
+            <div class="form-group">
+                <label>Volunteers</label>
+                <input type="number" min="0" class="form-control" name="contents">
+            </div>
+
+            <button type="submit" class="btn btn-warning btn-lg">Release</button>
+        </form>
+
+        <hr>
+
+        <p>back to <a href="/managerIndex">index</a></p>
+    </div>
+</div>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.slim.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</body>
+</html>
